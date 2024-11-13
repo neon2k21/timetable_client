@@ -1,16 +1,25 @@
 const db = require('../config')
 
+router.post('/getStudent', studentsController.getStudent)
 
-class UserController{
+//put
+router.put('/setStudentToken',studentsController.setStudentToken)
+router.put('/setStudentGrp', studentsController.setStudentGrp)
+
+//delete
+router.delete('/deleteStudent',studentsController.deleteStudent)
+
+
+class StudentsController{
 
     //Создание пользователя
-    async createUser(req, res) {
-        const { login, pass } = req.body;
+    async createStudent(req, res) {
+        const { fio, login, pass, token, group_id } = req.body;
     
         // Сначала проверим, существует ли уже пользователь с таким логином
-        const checkUserSql = "SELECT * FROM users WHERE login = ?";
+        const checkStudentSql = "SELECT * FROM students WHERE login = ?";
         
-        db.get(checkUserSql, [login], (err, row) => {
+        db.get(checkStudentSql, [login], (err, row) => {
             if (err) {
                 return res.status(500).json({ error: 'Database error' });
             }
@@ -21,9 +30,9 @@ class UserController{
             }
     
             // Если логин уникален, продолжаем с созданием пользователя
-            const insertUserSql = "INSERT INTO users (login, pass, token) VALUES (?, ?, ?)";
+            const insertStudentSql = "INSERT INTO students (fio, login, pass, token, group_id) VALUES (?, ?, ?, ?, ?)";
     
-            db.run(insertUserSql, [login, pass, ""], function(err) {
+            db.run(insertStudentSql, [fio, login, pass, "token", group_id], function(err) {
                 if (err) {
                     return res.status(500).json({ error: 'Failed to create user' });
                 } else {
@@ -109,4 +118,4 @@ class UserController{
 
 
 
-module.exports = new UserController()
+module.exports = new StudentsController()
