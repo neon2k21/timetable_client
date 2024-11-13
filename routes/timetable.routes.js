@@ -5,25 +5,15 @@ const timetableController = require('../controller/timetable.controller')
 
 
 //post
-router.post('/createUser', timetableController.createUser)
-router.post('/getUser', timetableController.getUser)
-router.post('/getUserData',timetableController.getUserData)
-router.post('/getTotalUserPoints', timetableController.getTotalUserPoints)
-router.post('/getAllStatisticsForUserByTracks', timetableController.getAllStatisticsForUserByTracks)
-router.post('/getAllStatisticsForUser', timetableController.getAllStatisticsForUser)
-router.post('/getAllUsersDataByGrp', timetableController.getAllUsersDataByGrp)
-router.get('/getAllUsersData', timetableController.getAllUsersData)
+router.post('/createTimetable', timetableController.createTimetable)
+router.post('/getTimetable', timetableController.getTimetable)
+router.post('/getTimetableByGroup',timetableController.getTimetableByGroup)
+router.post('/getTimetableByTeacher', timetableController.getTimetableByTeacher)
+router.post('/getTimetableByPlace', timetableController.getTimetableByPlace)
 //put
-router.put('/setUserToken',timetableController.setUserToken)
-router.put('/setUserGrp', timetableController.setUserGrp)
-router.put('/setUserAvatar', timetableController.setUserAvatar)
-router.put('/setIndividualUserCompleteTasks', timetableController.setIndividualUserCompleteTasks)
-router.put('/setGroupUserCompleteTasks', timetableController.setGroupUserCompleteTasks)
-router.put('/setUserIndividualPoints', timetableController.setUserIndividualPoints)
-router.put('/setUserGroupPoints', timetableController.setUserGroupPoints)
-
+router.put('/updateTimetable',timetableController.updateTimetable)
 //delete
-router.delete('/deleteUser',timetableController.deleteUser)
+router.delete('/deleteTimetable',timetableController.deleteTimetable)
 
 
 module.exports = router
