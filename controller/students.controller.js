@@ -1,13 +1,6 @@
 const db = require('../config')
 
-router.post('/getStudent', studentsController.getStudent)
 
-//put
-router.put('/setStudentToken',studentsController.setStudentToken)
-router.put('/setStudentGrp', studentsController.setStudentGrp)
-
-//delete
-router.delete('/deleteStudent',studentsController.deleteStudent)
 
 
 class StudentsController{
@@ -44,10 +37,10 @@ class StudentsController{
     
 
     //Получение пользователя
-    async getUser(req,res){
+    async getStudent(req,res){
         const { login, password} = req.body
         const sql = (
-            `select * from users where (login=? AND pass=?);`
+            `select * from students where (login=? AND pass=?);`
         )
         db.all(sql,[login, password], (err,rows) => {
             if (err) return res.json(err)
@@ -58,7 +51,7 @@ class StudentsController{
 
 
     //Удаление пользователя
-    async deleteUser(req, res) {
+    async deleteStudent(req, res) {
         const { id } = req.body;
     
         // Проверяем, указан ли id и является ли он числом
@@ -67,7 +60,7 @@ class StudentsController{
         }
     
         // Проверяем, существует ли пользователь с данным ID
-        const checkUserSql = 'SELECT * FROM users WHERE id = ?';
+        const checkUserSql = 'SELECT * FROM students WHERE id = ?';
     
         db.get(checkUserSql, [id], (err, user) => {
             if (err) {
@@ -80,7 +73,7 @@ class StudentsController{
             }
     
             // Удаляем пользователя
-            const deleteSql = 'DELETE FROM users WHERE id = ?';
+            const deleteSql = 'DELETE FROM students WHERE id = ?';
     
             db.run(deleteSql, [id], function (err) {
                 if (err) {
@@ -100,11 +93,11 @@ class StudentsController{
     
     
     //Установка токена телефона к юзеру
-    async setUserToken(req,res){
+    async setStudentToken(req,res){
         const {user, token} =req.body
         
         const sql = (
-            ` update users set token=? where id=?;`
+            ` update students set token=? where id=?;`
         )
 
         db.all(sql,[token, user], (err,rows) => {
@@ -113,6 +106,18 @@ class StudentsController{
         })
     }
 
+    async setStudentGrp(req,res){
+        const {user, group_id} =req.body
+        
+        const sql = (
+            ` update users set group_id=? where id=?;`
+        )
+
+        db.all(sql,[group_id, user], (err,rows) => {
+            if (err) return res.json(err)
+            else res.json(rows)
+        })
+    }
     
 }
 
