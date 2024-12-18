@@ -1,6 +1,6 @@
 const Router = require('express')
 const router = new Router()
-const groupController = require('../controller/group.controller')
+const groupController = require('../controller/groups.controller')
 
 
 
