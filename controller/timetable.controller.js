@@ -1,112 +1,84 @@
-const db = require('../config')
+const db = require('../config');
 
+class TimeTableController {
+    // Create a new timetable entry
+    async createTimetable(req, res) {
+        const { subject_id, group_id, place, teacher_id, day, placeInDay, start_time, end_time } = req.body;
 
-class UserController{
+        const sql = `INSERT INTO timetable (subject_id, group_id, place, teacher_id, day, placeInDay, start_time, end_time) 
+                     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
 
-    //Создание пользователя
-    async createUser(req, res) {
-        const { login, pass } = req.body;
-    
-        // Сначала проверим, существует ли уже пользователь с таким логином
-        const checkUserSql = "SELECT * FROM users WHERE login = ?";
-        
-        db.get(checkUserSql, [login], (err, row) => {
+        db.run(sql, [subject_id, group_id, place, teacher_id, day, placeInDay, start_time, end_time], function (err) {
             if (err) {
-                return res.status(500).json({ error: 'Database error' });
+                return res.status(500).json({ error: 'Failed to create timetable entry', details: err.message });
             }
-    
-            // Если пользователь с таким логином уже существует
-            if (row) {
-                return res.status(400).json({ error: 'User with this login already exists' });
-            }
-    
-            // Если логин уникален, продолжаем с созданием пользователя
-            const insertUserSql = "INSERT INTO users (login, pass, token) VALUES (?, ?, ?)";
-    
-            db.run(insertUserSql, [login, pass, ""], function(err) {
-                if (err) {
-                    return res.status(500).json({ error: 'Failed to create user' });
-                } else {
-                    return res.status(201).json({ id: this.lastID, login: login }); // Возвращаем ID нового пользователя
-                }
-            });
+            res.status(201).json({ id: this.lastID, message: 'Timetable entry created successfully' });
         });
     }
-    
 
-    //Получение пользователя
-    async getUser(req,res){
-        const { login, password} = req.body
-        const sql = (
-            `select * from users where (login=? AND pass=?);`
-        )
-        db.all(sql,[login, password], (err,rows) => {
-            if (err) return res.json(err)
-            if(rows.length === 0) return res.json('Данные не совпадают! Проверьте и повторите попытку')
-            else res.json(rows)
-    })
-    }
+    // Retrieve timetable entries
+    async getTimetable(req, res) {
+        const { group_id, day } = req.query;
 
+        let sql = `SELECT * FROM timetable WHERE id=?`;
+        const params = [];
 
-    //Удаление пользователя
-    async deleteUser(req, res) {
-        const { id } = req.body;
-    
-        // Проверяем, указан ли id и является ли он числом
-        if (!id || isNaN(id)) {
-            return res.status(400).json({ message: 'Invalid user ID' });
+        if (group_id || day) {
+            sql += ' WHERE';
+            if (group_id) {
+                sql += ' group_id = ?';
+                params.push(group_id);
+            }
+            if (day) {
+                if (params.length) sql += ' AND';
+                sql += ' day = ?';
+                params.push(day);
+            }
         }
-    
-        // Проверяем, существует ли пользователь с данным ID
-        const checkUserSql = 'SELECT * FROM users WHERE id = ?';
-    
-        db.get(checkUserSql, [id], (err, user) => {
+
+        db.all(sql, params, (err, rows) => {
             if (err) {
-                return res.status(500).json({ error: err.message });
+                return res.status(500).json({ error: 'Failed to retrieve timetable', details: err.message });
             }
-    
-            // Если пользователь не существует, возвращаем ошибку
-            if (!user) {
-                return res.status(404).json({ message: 'User not found' });
-            }
-    
-            // Удаляем пользователя
-            const deleteSql = 'DELETE FROM users WHERE id = ?';
-    
-            db.run(deleteSql, [id], function (err) {
-                if (err) {
-                    return res.status(500).json({ error: err.message });
-                }
-    
-                // Проверяем, сколько записей было удалено
-                if (this.changes === 0) {
-                    return res.status(404).json({ message: 'User not found' });
-                }
-    
-                return res.json({ message: 'User deleted successfully' });
-            });
+            res.json(rows);
         });
     }
-    
-    
-    
-    //Установка токена телефона к юзеру
-    async setUserToken(req,res){
-        const {user, token} =req.body
-        
-        const sql = (
-            ` update users set token=? where id=?;`
-        )
 
-        db.all(sql,[token, user], (err,rows) => {
-            if (err) return res.json(err)
-            else res.json(rows)
-        })
+    // Update a timetable entry
+    async updateTimetable(req, res) {
+        const { id, subject_id, group_id, place, teacher_id, day, placeInDay, start_time, end_time } = req.body;
+
+        const sql = `UPDATE timetable 
+                     SET subject_id = ?, group_id = ?, place = ?, teacher_id = ?, day = ?, placeInDay = ?, start_time = ?, end_time = ? 
+                     WHERE id = ?`;
+
+        db.run(sql, [subject_id, group_id, place, teacher_id, day, placeInDay, start_time, end_time, id], function (err) {
+            if (err) {
+                return res.status(500).json({ error: 'Failed to update timetable entry', details: err.message });
+            }
+            if (this.changes === 0) {
+                return res.status(404).json({ message: 'Timetable entry not found' });
+            }
+            res.json({ message: 'Timetable entry updated successfully' });
+        });
     }
 
-    
+    // Delete a timetable entry
+    async deleteTimetable(req, res) {
+        const { id } = req.body;
+
+        const sql = `DELETE FROM timetable WHERE id = ?`;
+
+        db.run(sql, [id], function (err) {
+            if (err) {
+                return res.status(500).json({ error: 'Failed to delete timetable entry', details: err.message });
+            }
+            if (this.changes === 0) {
+                return res.status(404).json({ message: 'Timetable entry not found' });
+            }
+            res.json({ message: 'Timetable entry deleted successfully' });
+        });
+    }
 }
 
-
-
-module.exports = new UserController()
+module.exports = new TimeTableController();
